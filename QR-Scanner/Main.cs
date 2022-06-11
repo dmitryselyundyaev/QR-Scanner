@@ -10,23 +10,23 @@ using ZXing;
 
 namespace QR_Scanner
 {
-    public partial class Form1 : Form
+    public partial class Main : Form
     {
+        //List to store all word numbers.
         public List<string> Numbers = new List<string>();
-        public Form1()
+        public Main()
         {
             InitializeComponent();
-            //SaveRecover();
             VideoStart();
         }
-        FilterInfoCollection FilterInfoCollection;
-        VideoCaptureDevice VideoCaptureDevice;
-
         private void Form1_Load(object sender, EventArgs e)
         {
 
         }
-        ///Initializing video device and creating handler
+
+        //Initializing video device and creating handler.
+        FilterInfoCollection FilterInfoCollection;
+        VideoCaptureDevice VideoCaptureDevice;
         public void VideoStart()
         {
             FilterInfoCollection = new FilterInfoCollection(FilterCategory.VideoInputDevice);
@@ -35,26 +35,35 @@ namespace QR_Scanner
             VideoCaptureDevice.NewFrame += GoLive;
             VideoCaptureDevice.Start();
         }
+
+        //Live scanning for any QR, and then display it on the header label.
         private void GoLive(object sender, NewFrameEventArgs eventArgs)
         {
             BarcodeReader reader = new BarcodeReader();
             var result = reader.Decode((Bitmap)eventArgs.Frame.Clone());
             if (result != null)
             {
-                this.Invoke((MethodInvoker)delegate {
+                //Second Thread Invoke.
+                Invoke((MethodInvoker)delegate {
                     labelScanned.Text = result.Text;
                 });
-
+            }
+            else
+            {
+                //Label flushing.
+                Invoke((MethodInvoker)delegate {
+                    labelScanned.Text = null;
+                });
             }
         }
-        ///Handler for picture box updating
+        //Handler for picture box updating.
         private void VideoCaptureDevice_NewFrame(object sender, NewFrameEventArgs eventArgs)
         {
             pictureBoxWebCam.Image = (Bitmap)eventArgs.Frame.Clone();
             Scanning(eventArgs);
         }
 
-        ///Save and generate QR.
+        //Save and generate QR.
         private void BtnSaveQR_Click(object sender, EventArgs e)
         {
             var data = ListBoxOfAllCodes.SelectedItem.ToString();
@@ -64,7 +73,7 @@ namespace QR_Scanner
             writer.Write(data).Save(path);
         }
 
-        ///Method decode bitmap and updating scanned QR.
+        //Method decode bitmap and updating scanned QR.
         private string scannedText;
         private void Scanning(NewFrameEventArgs eventArgs)
         {
@@ -73,11 +82,10 @@ namespace QR_Scanner
             if (result != null)
             {
                 scannedText = result.Text;
-
             }
-
         }
-        ///Scanning button.
+
+        //Scanning button.
         private void BtnScanning_Click_1(object sender, EventArgs e)
         {
             if (scannedText != null)
@@ -88,8 +96,9 @@ namespace QR_Scanner
             scannedText = null;
         }
 
-        ///Filepath.
+        //Filepath.
         public string filePath;
+        //Doc object for later.
         public Document doc;
         private void BtnPath_Click(object sender, EventArgs e)
         {
@@ -102,12 +111,13 @@ namespace QR_Scanner
             }
             if (filePath != null)
             {
-                //Create a Document object
+                //Create a Document object.
                 doc = new Document();
-                //Load a Word file
+                //Load a Word file.
                 doc.LoadFromFile(filePath);
                 var text = doc.GetText();
                 Numbers = text.Split(',').ToList();
+                //Spire description fix.
                 foreach (var number in Numbers)
                 {
                     if (number.Length < 20)

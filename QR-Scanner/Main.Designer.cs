@@ -1,6 +1,6 @@
 ﻿namespace QR_Scanner
 {
-    partial class Form1
+    partial class Main
     {
         /// <summary>
         /// Обязательная переменная конструктора.
