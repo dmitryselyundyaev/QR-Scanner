@@ -32,7 +32,20 @@ namespace QR_Scanner
             FilterInfoCollection = new FilterInfoCollection(FilterCategory.VideoInputDevice);
             VideoCaptureDevice = new VideoCaptureDevice(FilterInfoCollection[0].MonikerString);
             VideoCaptureDevice.NewFrame += VideoCaptureDevice_NewFrame;
+            VideoCaptureDevice.NewFrame += GoLive;
             VideoCaptureDevice.Start();
+        }
+        private void GoLive(object sender, NewFrameEventArgs eventArgs)
+        {
+            BarcodeReader reader = new BarcodeReader();
+            var result = reader.Decode((Bitmap)eventArgs.Frame.Clone());
+            if (result != null)
+            {
+                this.Invoke((MethodInvoker)delegate {
+                    labelScanned.Text = result.Text;
+                });
+
+            }
         }
         ///Handler for picture box updating
         private void VideoCaptureDevice_NewFrame(object sender, NewFrameEventArgs eventArgs)
